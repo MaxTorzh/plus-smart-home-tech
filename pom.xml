@@ -39,18 +39,21 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Apache Avro for schema definition and serialization -->
             <dependency>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
             </dependency>
 
+            <!-- Kafka clients for messaging -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka-clients.version}</version>
             </dependency>
 
+            <!-- SpringDoc OpenAPI for API documentation -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -81,7 +84,6 @@
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
-
             <!--    / GRPC dependencies management        -->
         </dependencies>
     </dependencyManagement>
@@ -89,16 +91,19 @@
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Maven compiler plugin for Java compilation -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                 </plugin>
+                <!-- Avro plugin for generating Java classes from Avro schemas -->
                 <plugin>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-maven-plugin</artifactId>
                     <version>${avro-maven-plugin.version}</version>
                 </plugin>
+                <!-- Protobuf plugin for generating Java classes from Protobuf definitions -->
                 <plugin>
                     <groupId>io.github.ascopes</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
