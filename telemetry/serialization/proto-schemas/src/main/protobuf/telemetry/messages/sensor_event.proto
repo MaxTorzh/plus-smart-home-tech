@@ -40,8 +40,8 @@ message LightSensorProto {
 
 message ClimateSensorProto {
   int32 temperature_c = 1;  // Temperature level in Celsius
-  int32 humidity = 3;       // Humidity level
-  int32 co2_level = 5;      // CO2 level
+  int32 humidity = 2;       // Humidity level
+  int32 co2_level = 3;      // CO2 level
 }
 
 message SwitchSensorProto {
