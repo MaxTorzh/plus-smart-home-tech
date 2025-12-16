@@ -51,45 +51,38 @@ public class SnapshotServiceImpl implements SnapshotService {
      */
     @Override
     public Optional<SensorsSnapshotAvro> updateState(final SensorEventAvro event) {
-        log.info("Updating snapshot for hubId={} with event - sensorId={}", event.getHubId(), event.getId());
+        log.info("UPDATE_STATE - hub={}, sensor={}, time={}",
+                event.getHubId(), event.getId(), event.getTimestamp());
 
         final SensorsSnapshotAvro snapshot = snapshots.findByHubId(event.getHubId())
-                .orElseGet(() -> buildSnapshot(event));
+                .orElseGet(() -> {
+                    log.info("NEW_SNAPSHOT for hub={}", event.getHubId());
+                    return buildSnapshot(event);
+                });
 
-        if (isCurrentSnapshotValid(snapshot, event)) {
-            log.info("No update required for hubId={} and sensorId={}", event.getHubId(), event.getId());
-            return Optional.empty();
-        }
+        snapshot.setTimestamp(event.getTimestamp());
 
         updateSnapshotData(snapshot, event);
 
         snapshots.save(snapshot);
+
+        log.info("SNAPSHOT_UPDATED - hub={}, sensors_count={}",
+                snapshot.getHubId(), snapshot.getSensorsState().size());
         return Optional.of(snapshot);
     }
 
     private void updateSnapshotData(final SensorsSnapshotAvro snapshot, final SensorEventAvro event) {
-        log.debug("Updating snapshot with new sensor state {}", event.getPayload());
+        log.debug("Updating sensor state: {}", event.getId());
+
         final SensorStateAvro newState = SensorStateAvro.newBuilder()
                 .setTimestamp(event.getTimestamp())
                 .setData(event.getPayload())
                 .build();
 
         snapshot.getSensorsState().put(event.getId(), newState);
-        snapshot.setTimestamp(event.getTimestamp());
-    }
-
-    private boolean isCurrentSnapshotValid(final SensorsSnapshotAvro currentSnapshot,
-                                           final SensorEventAvro event) {
-        log.debug("Validating current snapshot data {} against new event data {}",currentSnapshot, event);
-        final SensorStateAvro currentState = currentSnapshot.getSensorsState().get(event.getId());
-
-        return currentState != null &&
-                (!currentState.getTimestamp().isBefore(event.getTimestamp()) ||
-                        currentState.getData().equals(event.getPayload()));
     }
 
     private SensorsSnapshotAvro buildSnapshot(final SensorEventAvro event) {
-        log.debug("Creating new snapshot with reading from the sensor event {}.", event);
         return SensorsSnapshotAvro.newBuilder()
                 .setHubId(event.getHubId())
                 .setTimestamp(event.getTimestamp())
