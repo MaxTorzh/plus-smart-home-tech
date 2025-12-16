@@ -1,5 +1,7 @@
 package ru.yandex.practicum.telemetry.aggregator.service;
 
+import java.time.Duration;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -11,10 +13,7 @@ import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
-import ru.yandex.practicum.telemetry.aggregator.configuration.AggregatorKafkaTopicConfig;
-
-import java.time.Duration;
-import java.util.Optional;
+import ru.yandex.practicum.telemetry.aggregator.configuration.kafka.AggregatorKafkaTopicConfig;
 
 /**
  * {@code AggregationStarter} is responsible for initiating and managing the data aggregation

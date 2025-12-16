@@ -6,7 +6,7 @@ protocol SensorsSnapshotProtocol {
 	record SensorsSnapshotAvro {
 		string hubId;                      // Hub identifier
 		timestamp_ms timestamp;            // Snapshot timesatmp
-		map<SensorStateAvro> sensorsState; // Collection of Sensor state mapped by the device IDs
+		map<SensorStateAvro> sensorsState; // Collection of Sensors state mapped by the device IDs
 	}
 
 	record SensorStateAvro {
