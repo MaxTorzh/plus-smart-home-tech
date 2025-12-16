@@ -10,7 +10,9 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * A generic deserializer fir Avro messages that converts binary data to a specific Avro records.
@@ -20,18 +22,12 @@ import java.io.IOException;
 @Slf4j
 public class BaseAvroDeserializer<T extends SpecificRecordBase> implements Deserializer<T> {
 
+    private final Schema schema;
     private final DecoderFactory decoderFactory;
-    private final DatumReader<T> datumReader;
-    private BinaryDecoder decoder;
-
 
     public BaseAvroDeserializer(final Schema schema) {
-        this(DecoderFactory.get(), schema);
-    }
-
-    public BaseAvroDeserializer(final DecoderFactory decoderFactory, final Schema schema) {
-        this.decoderFactory = decoderFactory;
-        this.datumReader = new SpecificDatumReader<>(schema);
+        this.schema = schema;
+        this.decoderFactory = DecoderFactory.get();
     }
 
     @Override
@@ -40,8 +36,11 @@ public class BaseAvroDeserializer<T extends SpecificRecordBase> implements Deser
             log.warn("No data to deserialize for topic: {}", topic);
             return null;
         }
-        try {
-            decoder = decoderFactory.binaryDecoder(data, decoder);
+
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data)) {
+            BinaryDecoder decoder = decoderFactory.binaryDecoder(inputStream, null);
+            DatumReader<T> datumReader = new SpecificDatumReader<>(schema);
+
             T result = datumReader.read(null, decoder);
             log.debug("Successfully deserialized record from topic: {}", topic);
             return result;
@@ -50,5 +49,13 @@ public class BaseAvroDeserializer<T extends SpecificRecordBase> implements Deser
             throw new SerializationException(
                     "Error occurs during data deserialization, topic [" + topic + "].", e);
         }
+    }
+
+    @Override
+    public void configure(Map<String, ?> configs, boolean isKey) {
+    }
+
+    @Override
+    public void close() {
     }
 }
