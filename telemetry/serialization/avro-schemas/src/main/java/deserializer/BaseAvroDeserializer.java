@@ -1,5 +1,6 @@
 package deserializer;
 
+import exception.DeserializationException;
 import org.apache.avro.Schema;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DatumReader;
@@ -7,7 +8,6 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.specific.SpecificDatumReader;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.common.serialization.Deserializer;
-import org.springframework.kafka.support.serializer.DeserializationException;
 
 public class BaseAvroDeserializer<T extends SpecificRecordBase> implements Deserializer<T> {
     private final DecoderFactory decoderFactory;
@@ -32,7 +32,7 @@ public class BaseAvroDeserializer<T extends SpecificRecordBase> implements Deser
 
             return null;
         } catch (Exception e) {
-            throw new DeserializationException("Ошибка при десериализации данных из топика" + topic , data, false, e);
+            throw new DeserializationException("Ошибка при десериализации данных из топика" + topic, e);
         }
     }
 }
