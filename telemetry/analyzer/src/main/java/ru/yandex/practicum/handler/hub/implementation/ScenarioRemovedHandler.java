@@ -16,6 +16,10 @@ import ru.yandex.practicum.repository.ScenarioRepository;
 
 import java.util.Optional;
 
+/**
+ * ScenarioRemovedHandler is a hub event handler that processes ScenarioRemovedEventAvro events.
+ * It handles scenario removal events by deleting scenarios, conditions, and actions from the database.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -25,11 +29,21 @@ public class ScenarioRemovedHandler implements HubEventHandler {
     final ConditionRepository conditionRepository;
     final ScenarioRepository scenarioRepository;
 
+    /**
+     * Returns the event type that this handler processes.
+     *
+     * @return the simple class name of ScenarioRemovedHandler
+     */
     @Override
     public String getType() {
         return ScenarioRemovedHandler.class.getSimpleName();
     }
 
+    /**
+     * Handles a ScenarioRemovedEvent by deleting the scenario and its associated conditions and actions.
+     *
+     * @param event the hub event containing scenario removal information
+     */
     @Override
     @Transactional
     public void handle(HubEventAvro event) {

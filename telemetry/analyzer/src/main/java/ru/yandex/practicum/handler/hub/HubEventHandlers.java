@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * HubEventHandlers is a registry that holds all available hub event handlers.
+ * It provides a centralized way to access handlers by their event type.
+ */
 @Getter
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE)

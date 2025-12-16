@@ -17,6 +17,14 @@ import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * SnapshotProcessor is responsible for consuming and processing sensor snapshots from Kafka.
+ * It runs as a separate thread and evaluates scenarios based on current sensor states.
+ * When scenario conditions are met, it triggers the appropriate actions.
+ *
+ * This processor subscribes to the sensor snapshots topic and continuously polls for new snapshots.
+ * Each snapshot is processed by the SnapshotHandler to determine if any scenarios should be activated.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,6 +36,10 @@ public class SnapshotProcessor {
     @Value("${kafka.topics.snapshot}")
     String topic;
 
+    /**
+     * Starts the snapshot processing loop.
+     * Continuously polls for sensor snapshots and processes them.
+     */
     public void start() {
         try {
             Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
@@ -47,14 +59,14 @@ public class SnapshotProcessor {
             }
 
         } catch (WakeupException ignored) {
-            log.error("Получено исключение WakeupException");
+            log.error("WakeupException received");
         } catch (Exception e) {
-            log.error("Возникла ошибка при обработке сообщений", e);
+            log.error("Error occurred while processing messages", e);
         } finally {
             try {
                 consumer.commitSync();
             } catch (Exception e) {
-                log.error("Возникла ошибка при сбросе данных", e);
+                log.error("Error occurred while flushing data", e);
             } finally {
                 consumer.close();
             }

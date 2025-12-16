@@ -20,6 +20,10 @@ import ru.yandex.practicum.service.HubRouterClient;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * SnapshotHandler processes sensor snapshots and evaluates scenarios based on current sensor states.
+ * When a scenario's conditions are met, it triggers the associated actions.
+ */
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -29,6 +33,12 @@ public class SnapshotHandler {
     final ActionRepository actionRepository;
     final ScenarioRepository scenarioRepository;
 
+    /**
+     * Handles a sensor snapshot by checking if any scenarios should be triggered
+     * based on current sensor states and sends corresponding actions.
+     *
+     * @param snapshot the sensor snapshot containing current sensor states
+     */
     public void handleSnapshot(SensorsSnapshotAvro snapshot) {
         Map<String, SensorStateAvro> sensorState = snapshot.getSensorsState();
         scenarioRepository.findByHubId(snapshot.getHubId()).stream()
@@ -38,6 +48,13 @@ public class SnapshotHandler {
                 });
     }
 
+    /**
+     * Checks if a condition is satisfied based on the comparison operation.
+     *
+     * @param condition the condition to check
+     * @param value the current sensor value
+     * @return true if the condition is satisfied, false otherwise
+     */
     private Boolean checkOperation(Condition condition, Integer value) {
         Integer conditionValue = condition.getValue();
 
@@ -57,6 +74,13 @@ public class SnapshotHandler {
         }
     }
 
+    /**
+     * Checks if a specific condition is met for a given sensor state.
+     *
+     * @param condition the condition to evaluate
+     * @param sensorState map of current sensor states
+     * @return true if the condition is met, false otherwise
+     */
     private Boolean checkCondition(Condition condition, Map<String, SensorStateAvro> sensorState) {
         SensorStateAvro sensorStateAvro = sensorState.get(condition.getSensor().getId());
 
@@ -94,11 +118,23 @@ public class SnapshotHandler {
         }
     }
 
+    /**
+     * Checks if all conditions for a scenario are met based on current sensor states.
+     *
+     * @param scenario the scenario to check
+     * @param sensorState map of current sensor states
+     * @return true if all conditions are met, false otherwise
+     */
     private Boolean checkScenario(Scenario scenario, Map<String, SensorStateAvro> sensorState) {
         return conditionRepository.findAllByScenario(scenario).stream()
                 .allMatch(condition -> checkCondition(condition, sensorState));
     }
 
+    /**
+     * Sends all actions associated with a scenario to the hub router.
+     *
+     * @param scenario the scenario whose actions should be executed
+     */
     private void sendAction(Scenario scenario) {
         actionRepository.findAllByScenario(scenario).forEach(hubRouterClient::sendRequest);
     }

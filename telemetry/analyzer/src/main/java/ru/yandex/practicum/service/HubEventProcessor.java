@@ -19,6 +19,13 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * HubEventProcessor is responsible for consuming and processing hub events from Kafka.
+ * It runs as a separate thread and dispatches events to appropriate handlers based on event type.
+ *
+ * This processor subscribes to the hub events topic and continuously polls for new events.
+ * When events arrive, it identifies the appropriate handler and delegates processing to it.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,9 +34,16 @@ public class HubEventProcessor implements Runnable {
     final ConsumerHubService consumer;
     final HubEventHandlers hubHandlers;
 
+    /**
+     * Kafka topic name for hub events
+     */
     @Value("${kafka.topics.hub}")
     String topic;
 
+    /**
+     * Main execution method that runs the hub event processing loop.
+     * Continuously polls for hub events and processes them using appropriate handlers.
+     */
     @Override
     public void run() {
         try {
@@ -54,14 +68,14 @@ public class HubEventProcessor implements Runnable {
                 }
             }
         } catch (WakeupException ignored) {
-            log.error("Получено исключение WakeupException");
+            log.error("WakeupException received");
         } catch (Exception e) {
-            log.error("Возникла ошибка при обработке сообщений", e);
+            log.error("Error occurred while processing messages", e);
         } finally {
             try {
                 consumer.commitSync();
             } catch (Exception e) {
-                log.error("Возникла ошибка при сбросе данных", e);
+                log.error("Error occurred while flushing data", e);
             } finally {
                 consumer.close();
             }
