@@ -3,6 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+    <!-- Parent project inheritance from Spring Boot starter parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -10,56 +12,50 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <!-- Project coordinates -->
     <groupId>ru.yandex.practicum</groupId>
     <artifactId>smart-home-tech</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <!-- Packaging type - this is a parent POM -->
     <packaging>pom</packaging>
 
+    <!-- Child modules included in this multi-module project -->
     <modules>
         <module>telemetry</module>
         <module>infra</module>
         <module>commerce</module>
     </modules>
 
+    <!-- Project properties and dependency versions -->
     <properties>
+        <!-- Java version for compilation -->
         <java.version>21</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
 
+        <!-- Dependency versions managed across all modules -->
         <avro.version>1.11.3</avro.version>
         <kafka-clients.version>3.6.1</kafka-clients.version>
         <springdoc-openapi-starter.version>2.6.0</springdoc-openapi-starter.version>
         <grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version>
         <protobuf.version>3.23.4</protobuf.version>
         <grpc.version>1.63.0</grpc.version>
-        <spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
 
-        <!--       Plugins       -->
+        <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version>
         <protobuf-plugin.version>2.4.0</protobuf-plugin.version>
     </properties>
 
+    <!-- Centralized dependency management for child modules -->
     <dependencyManagement>
         <dependencies>
-
-            <!-- Spring Cloud-->
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud-dependencies.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!-- Apache Avro for schema definition and serialization -->
+            <!-- Apache Avro for serialization -->
             <dependency>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
             </dependency>
 
-            <!-- Kafka clients for messaging -->
+            <!-- Apache Kafka clients for messaging -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
@@ -73,34 +69,39 @@
                 <version>${springdoc-openapi-starter.version}</version>
             </dependency>
 
-            <!--    GRPC dependencies management        -->
+            <!-- gRPC dependencies management section -->
+            <!-- Generic gRPC Spring Boot starter -->
             <dependency>
                 <groupId>net.devh</groupId>
                 <artifactId>grpc-spring-boot-starter</artifactId>
                 <version>${grpc-spring-boot-starter.version}</version>
             </dependency>
 
+            <!-- gRPC Server Spring Boot starter -->
             <dependency>
                 <groupId>net.devh</groupId>
                 <artifactId>grpc-server-spring-boot-starter</artifactId>
                 <version>${grpc-spring-boot-starter.version}</version>
             </dependency>
 
+            <!-- gRPC stub generation -->
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
 
+            <!-- gRPC Protocol Buffers support -->
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
-            <!--    / GRPC dependencies management        -->
+            <!-- End of gRPC dependencies management -->
         </dependencies>
     </dependencyManagement>
 
+    <!-- Plugin management for consistent plugin versions across modules -->
     <build>
         <pluginManagement>
             <plugins>
@@ -110,13 +111,15 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                 </plugin>
-                <!-- Avro plugin for generating Java classes from Avro schemas -->
+
+                <!-- Avro Maven plugin for generating Java classes from Avro schemas -->
                 <plugin>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-maven-plugin</artifactId>
                     <version>${avro-maven-plugin.version}</version>
                 </plugin>
-                <!-- Protobuf plugin for generating Java classes from Protobuf definitions -->
+
+                <!-- Protocol Buffers Maven plugin for generating Java classes from .proto files -->
                 <plugin>
                     <groupId>io.github.ascopes</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
@@ -125,5 +128,4 @@
             </plugins>
         </pluginManagement>
     </build>
-
 </project>

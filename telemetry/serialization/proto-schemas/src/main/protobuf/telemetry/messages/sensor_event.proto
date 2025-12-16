@@ -7,43 +7,42 @@ option java_package = "ru.yandex.practicum.grpc.telemetry.event";
 
 import "google/protobuf/timestamp.proto";
 
-
 message SensorEventProto {
-  string id = 1; // Sensor identifier
-  google.protobuf.Timestamp timestamp = 2; // Event timestamp
-  string hubId = 3; // Associated hub identifier
-  oneof payload { // Event data from a specific device
-    MotionSensorProto motion_sensor_event = 4; // Data from a motion sensor event
-    TemperatureSensorProto temperature_sensor_event = 5; // Data from a temperature sensor event
-    LightSensorProto light_sensor_event = 6; // Data from a light sensor event
-    ClimateSensorProto climate_sensor_event = 7; // Data from a climate sensor event
-    SwitchSensorProto switch_sensor_event = 8; // Data from a switch sensor event
+    string id = 1; // sensor identifier
+    google.protobuf.Timestamp timestamp = 2; // event timestamp
+    string hubId = 3; // associated hub identifier
+    oneof payload { // specific device event data
+        MotionSensorEventProto motion_sensor_event = 4;            // motion sensor event data
+        TemperatureSensorEventProto temperature_sensor_event = 5;  // temperature sensor event data
+        LightSensorEventProto light_sensor_event = 6;              // light sensor event data
+        ClimateSensorEventProto climate_sensor_event = 7;          // climate sensor event data
+        SwitchSensorEventProto switch_sensor_event = 8;            // switch sensor event data
     }
 }
 
-message MotionSensorProto {
-  int32 link_quality = 1; // Signal quality; higher value indicates better quality
-  bool motion = 2;        // Indicates the presence of motion or someone’s presence
-  int32 voltage = 3;      // Voltage value, useful for assessing the current voltage in the sensor or related device
+message MotionSensorEventProto {
+    int32 link_quality = 1; // signal quality indicator; higher value means better connection quality
+    bool motion = 2;        // indication of motion or presence
+    int32 voltage = 3;      // voltage value that can be used to assess current voltage in the sensor or connected device
 }
 
-
-message TemperatureSensorProto {
-  int32 temperature_c = 1; // Temperature level in Celsius
-  int32 temperature_f = 2; // Temperature level in Fahrenheit
+message TemperatureSensorEventProto {
+    int32 temperature_c = 1; // temperature level in Celsius scale
+    int32 temperature_f = 2; // temperature level in Fahrenheit scale
 }
 
-message LightSensorProto {
-  int32 link_quality = 1; // Signal quality
-  int32 luminosity = 2;   // Luminosity level
+message LightSensorEventProto {
+    int32 link_quality = 1; // signal level
+    int32 luminosity = 2;   // light level
 }
 
-message ClimateSensorProto {
-  int32 temperature_c = 1;  // Temperature level in Celsius
-  int32 humidity = 2;       // Humidity level
-  int32 co2_level = 3;      // CO2 level
+message ClimateSensorEventProto {
+    int32 temperature_c = 1;  // temperature level in Celsius scale
+    int32 humidity = 2;       // humidity
+    int32 co2_level = 3;      // CO2 level
 }
 
-message SwitchSensorProto {
-  bool state = 1; // Switch state: on/off
+message SwitchSensorEventProto {
+    bool state = 1; // switch state: on/off
 }
+
