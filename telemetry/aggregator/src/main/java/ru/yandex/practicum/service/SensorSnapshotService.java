@@ -16,11 +16,33 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * SensorSnapshotService is responsible for managing and updating sensor state snapshots.
+ * It maintains a collection of sensor states grouped by hub ID and determines when
+ * sensor states have changed based on incoming sensor events.
+ *
+ * This service tracks sensor state changes and creates snapshots that represent
+ * the current state of all sensors within a hub. It prevents duplicate or outdated
+ * events from affecting the sensor state and only produces snapshots when actual
+ * changes occur.
+ */
 @Slf4j
 @Service
 public class SensorSnapshotService {
     private final Map<String, SensorsSnapshotAvro> sensorsSnapshotMap = new HashMap<>();
 
+    /**
+     * Updates the state of a sensor based on a new event and returns an updated snapshot
+     * if the state has changed or was newly added.
+     *
+     * This method performs several checks:
+     * - Ensures the event timestamp is not older than the existing state
+     * - Compares the new payload with the existing one to detect changes
+     * - Only returns a snapshot if there's an actual change in state
+     *
+     * @param event the sensor event containing new state information
+     * @return an Optional containing the updated snapshot if state changed, empty otherwise
+     */
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
         String hubId = event.getHubId();
         String sensorId = event.getId();
@@ -58,6 +80,20 @@ public class SensorSnapshotService {
         return Optional.of(snapshot);
     }
 
+    /**
+     * Determines if two sensor payloads are equivalent (unchanged).
+     *
+     * This method compares different types of sensor payloads:
+     * - Climate sensors: temperature, humidity, and CO2 levels
+     * - Light sensors: link quality and luminosity
+     * - Motion sensors: link quality, motion detection, and voltage
+     * - Switch sensors: state
+     * - Temperature sensors: Celsius and Fahrenheit temperatures
+     *
+     * @param oldPayload the previous sensor data
+     * @param newPayload the new sensor data
+     * @return true if payloads are equivalent, false otherwise
+     */
     private Boolean isUnchanged(Object oldPayload, Object newPayload) {
         if (!oldPayload.getClass().equals(newPayload.getClass())) {
             log.warn("Payload type mismatch: {} != {}", oldPayload.getClass(), newPayload.getClass());
