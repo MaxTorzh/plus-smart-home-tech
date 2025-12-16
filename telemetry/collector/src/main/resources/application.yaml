@@ -11,8 +11,3 @@ collector:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer
-
-#logging:
-#  level:
-#    root: DEBUG
-#    org.springframework.web: INFO
