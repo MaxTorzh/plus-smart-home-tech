@@ -4,3 +4,45 @@ package telemetry.message.event;
 
 option java_multiple_files = true;
 option java_package = "ru.yandex.practicum.grpc.telemetry.event";
+
+import "google/protobuf/timestamp.proto";
+
+message SensorEventProto {
+    string id = 1; // sensor identifier
+    google.protobuf.Timestamp timestamp = 2; // event timestamp
+    string hubId = 3; // associated hub identifier
+    oneof payload { // specific device event data
+        MotionSensorEventProto motion_sensor_event = 4;            // motion sensor event data
+        TemperatureSensorEventProto temperature_sensor_event = 5;  // temperature sensor event data
+        LightSensorEventProto light_sensor_event = 6;              // light sensor event data
+        ClimateSensorEventProto climate_sensor_event = 7;          // climate sensor event data
+        SwitchSensorEventProto switch_sensor_event = 8;            // switch sensor event data
+    }
+}
+
+message MotionSensorEventProto {
+    int32 link_quality = 1; // signal quality indicator; higher value means better connection quality
+    bool motion = 2;        // indication of motion or presence
+    int32 voltage = 3;      // voltage value that can be used to assess current voltage in the sensor or connected device
+}
+
+message TemperatureSensorEventProto {
+    int32 temperature_c = 1; // temperature level in Celsius scale
+    int32 temperature_f = 2; // temperature level in Fahrenheit scale
+}
+
+message LightSensorEventProto {
+    int32 link_quality = 1; // signal level
+    int32 luminosity = 2;   // light level
+}
+
+message ClimateSensorEventProto {
+    int32 temperature_c = 1;  // temperature level in Celsius scale
+    int32 humidity = 2;       // humidity
+    int32 co2_level = 3;      // CO2 level
+}
+
+message SwitchSensorEventProto {
+    bool state = 1; // switch state: on/off
+}
+
