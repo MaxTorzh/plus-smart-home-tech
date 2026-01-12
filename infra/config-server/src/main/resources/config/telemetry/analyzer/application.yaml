@@ -1,0 +1,34 @@
+grpc:
+  client:
+    hub-router:
+      address: 'static://localhost:59090'
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      negotiationType: plaintext
+
+spring:
+  application:
+    name: analyzer
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:6541/smarthome
+    username: smarthome
+    password: smarthome
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+
+kafka:
+  bootstrap-servers: localhost:9092
+  group-id:
+    snapshot: analyzer.snapshots
+    hub: analyzer.hubs
+  topics:
+    snapshot: telemetry.snapshots.v1
+    hub: telemetry.hubs.v1
+  auto-commit: false
