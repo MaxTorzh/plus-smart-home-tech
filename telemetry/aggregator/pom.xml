@@ -57,6 +57,12 @@
             <artifactId>avro-schemas</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!-- Spring Cloud Config -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
     </dependencies>
 
     <!-- Build configuration and plugins -->
