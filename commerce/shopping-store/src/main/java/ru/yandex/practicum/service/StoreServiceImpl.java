@@ -2,9 +2,7 @@ package ru.yandex.practicum.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.mapper.ProductMapper;
@@ -12,10 +10,9 @@ import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.repository.StoreRepository;
 import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.dto.SetProductCountState;
-import ru.yandex.practicum.exception.ConditionsNotMetException;
 import ru.yandex.practicum.exception.NotFoundException;
-import ru.yandex.practicum.types.ProductCategory;
 import ru.yandex.practicum.types.ProductState;
+import ru.yandex.practicum.types.QuantityState;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,63 +26,96 @@ public class StoreServiceImpl implements StoreService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductDto> getProductsByCategory(ProductCategory category, ru.yandex.practicum.dto.Pageable pageable) {
-        Pageable pageRequest = PageRequest.of(pageable.getPage(), pageable.getSize(),
-                Sort.by(Sort.DEFAULT_DIRECTION, String.join(",", pageable.getSort())));
-        List<Product> products = storeRepository.findAllByProductCategory(category, pageRequest);
+    public List<ProductDto> getProductsByCategory(String category, Pageable pageable) {
+        try {
+            ru.yandex.practicum.types.ProductCategory productCategory =
+                    ru.yandex.practicum.types.ProductCategory.valueOf(category.toUpperCase());
+            List<Product> products = storeRepository.findAllByProductCategory(productCategory, pageable);
+            return productMapper.toProductDtoList(products);
+        } catch (IllegalArgumentException e) {
+            throw new NotFoundException("Category not found: " + category);
+        }
+    }
 
+    @Override
+    public List<ProductDto> getAllProducts(Pageable pageable) {
+        List<Product> products = storeRepository.findAll(pageable).getContent();
         return productMapper.toProductDtoList(products);
     }
 
     @Transactional
     @Override
     public ProductDto createProduct(ProductDto productDto) {
-        if (storeRepository.getByProductId(productDto.getProductId()).isPresent())
-            throw new ConditionsNotMetException("This item already in database");
+        Optional<Product> existingProduct = storeRepository.findByProductId(productDto.getProductId());
+        if (existingProduct.isPresent()) {
+            return productMapper.toProductDto(existingProduct.get());
+        }
+
         Product product = productMapper.toProduct(productDto);
 
-        return productMapper.toProductDto(storeRepository.save(product));
+        if (product.getProductState() == null) {
+            product.setProductState(ProductState.ACTIVE);
+        }
+        if (product.getQuantityState() == null) {
+            product.setQuantityState(QuantityState.ENOUGH);
+        }
+
+        Product savedProduct = storeRepository.save(product);
+        return productMapper.toProductDto(savedProduct);
     }
 
     @Transactional
     @Override
     public ProductDto updateProduct(ProductDto productDto) {
-        getProduct(productDto.getProductId());
+        Product existingProduct = storeRepository.findByProductId(productDto.getProductId())
+                .orElseThrow(() -> new NotFoundException("Product not found: " + productDto.getProductId()));
 
-        return productMapper.toProductDto(
-                storeRepository.save(productMapper.toProduct(productDto)));
+        if (productDto.getProductName() != null) {
+            existingProduct.setProductName(productDto.getProductName());
+        }
+        if (productDto.getProductCategory() != null) {
+            existingProduct.setProductCategory(productDto.getProductCategory());
+        }
+        if (productDto.getPrice() > 0) {
+            existingProduct.setPrice(productDto.getPrice());
+        }
+        if (productDto.getQuantityState() != null) {
+            existingProduct.setQuantityState(productDto.getQuantityState());
+        }
+        if (productDto.getProductState() != null) {
+            existingProduct.setProductState(productDto.getProductState());
+        }
+
+        Product updatedProduct = storeRepository.save(existingProduct);
+        return productMapper.toProductDto(updatedProduct);
     }
 
     @Transactional
     @Override
-    public boolean removeProduct(String productId) {
-        Product product = getProduct(productId);
+    public ProductDto removeProduct(String productId) {
+        Product product = storeRepository.findByProductId(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found: " + productId));
+
         product.setProductState(ProductState.DEACTIVATE);
-        storeRepository.save(product);
-
-        return true;
+        Product updatedProduct = storeRepository.save(product);
+        return productMapper.toProductDto(updatedProduct);
     }
 
     @Transactional
     @Override
-    public boolean changeState(SetProductCountState request) {
-        Product product = getProduct(request.getProductId());
-        product.setQuantityState(request.getQuantityState());
-        storeRepository.save(product);
+    public ProductDto changeState(SetProductCountState request) {
+        Product product = storeRepository.findByProductId(request.getProductId())
+                .orElseThrow(() -> new NotFoundException("Product not found: " + request.getProductId()));
 
-        return true;
+        product.setQuantityState(request.getQuantityState());
+        Product updatedProduct = storeRepository.save(product);
+        return productMapper.toProductDto(updatedProduct);
     }
 
     @Override
     public ProductDto getInfoByProduct(String productId) {
-        return productMapper.toProductDto(getProduct(productId));
-    }
-
-    private Product getProduct(String productId) {
-        Optional<Product> product = storeRepository.getByProductId(productId);
-        if (product.isEmpty())
-            throw new NotFoundException("Product with id " + productId + " is not found");
-
-        return product.get();
+        Product product = storeRepository.findByProductId(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found: " + productId));
+        return productMapper.toProductDto(product);
     }
 }
