@@ -12,7 +12,6 @@ import ru.yandex.practicum.types.QuantityState;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Product {
     @Id
     @Column(name = "product_id", nullable = false)

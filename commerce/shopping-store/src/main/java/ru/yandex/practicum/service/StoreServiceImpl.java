@@ -34,7 +34,7 @@ public class StoreServiceImpl implements StoreService {
                 Sort.by(Sort.DEFAULT_DIRECTION, String.join(",", pageable.getSort())));
         List<Product> products = storeRepository.findAllByProductCategory(category, pageRequest);
 
-        return productMapper.mapListProducts(products);
+        return productMapper.toProductDtoList(products);
     }
 
     @Transactional
@@ -42,9 +42,9 @@ public class StoreServiceImpl implements StoreService {
     public ProductDto createProduct(ProductDto productDto) {
         if (storeRepository.getByProductId(productDto.getProductId()).isPresent())
             throw new ConditionsNotMetException("This item already in database");
-        Product product = productMapper.productDtoToProduct(productDto);
+        Product product = productMapper.toProduct(productDto);
 
-        return productMapper.productToProductDto(storeRepository.save(product));
+        return productMapper.toProductDto(storeRepository.save(product));
     }
 
     @Transactional
@@ -52,8 +52,8 @@ public class StoreServiceImpl implements StoreService {
     public ProductDto updateProduct(ProductDto productDto) {
         getProduct(productDto.getProductId());
 
-        return productMapper.productToProductDto(
-                storeRepository.save(productMapper.productDtoToProduct(productDto)));
+        return productMapper.toProductDto(
+                storeRepository.save(productMapper.toProduct(productDto)));
     }
 
     @Transactional
@@ -78,7 +78,7 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     public ProductDto getInfoByProduct(String productId) {
-        return productMapper.productToProductDto(getProduct(productId));
+        return productMapper.toProductDto(getProduct(productId));
     }
 
     private Product getProduct(String productId) {

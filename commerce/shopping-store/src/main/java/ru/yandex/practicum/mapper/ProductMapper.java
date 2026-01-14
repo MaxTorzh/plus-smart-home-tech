@@ -1,36 +1,52 @@
 package ru.yandex.practicum.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.ReportingPolicy;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.model.Product;
 import ru.yandex.practicum.dto.ProductDto;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Mapper(
-        componentModel = MappingConstants.ComponentModel.SPRING,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
-public interface ProductMapper {
+@Component
+public class ProductMapper {
 
-    @Mapping(target = "id", ignore = true) // если id автоинкрементный
-    @Mapping(source = "productId", target = "productId")
-    @Mapping(source = "productName", target = "productName")
-    @Mapping(source = "productCategory", target = "productCategory")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "quantityState", target = "quantityState")
-    @Mapping(source = "productState", target = "productState")
-    Product productDtoToProduct(ProductDto productDto);
+    public Product toProduct(ProductDto dto) {
+        if (dto == null) {
+            return null;
+        }
 
-    @Mapping(source = "productId", target = "productId")
-    @Mapping(source = "productName", target = "productName")
-    @Mapping(source = "productCategory", target = "productCategory")
-    @Mapping(source = "price", target = "price")
-    @Mapping(source = "quantityState", target = "quantityState")
-    @Mapping(source = "productState", target = "productState")
-    ProductDto productToProductDto(Product product);
+        Product product = new Product();
+        product.setProductId(dto.getProductId());
+        product.setProductName(dto.getProductName());
+        product.setProductCategory(dto.getProductCategory());
+        product.setPrice(dto.getPrice());
+        product.setQuantityState(dto.getQuantityState());
+        product.setProductState(dto.getProductState());
+        return product;
+    }
 
-    List<ProductDto> mapListProducts(List<Product> products);
+    public ProductDto toProductDto(Product product) {
+        if (product == null) {
+            return null;
+        }
+
+        ProductDto dto = new ProductDto();
+        dto.setProductId(product.getProductId());
+        dto.setProductName(product.getProductName());
+        dto.setProductCategory(product.getProductCategory());
+        dto.setPrice(product.getPrice());
+        dto.setQuantityState(product.getQuantityState());
+        dto.setProductState(product.getProductState());
+        return dto;
+    }
+
+    public List<ProductDto> toProductDtoList(List<Product> products) {
+        if (products == null) {
+            return List.of();
+        }
+
+        return products.stream()
+                .map(this::toProductDto)
+                .collect(Collectors.toList());
+    }
 }
