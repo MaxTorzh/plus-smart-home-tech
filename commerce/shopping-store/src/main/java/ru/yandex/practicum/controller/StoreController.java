@@ -28,15 +28,15 @@ public class StoreController {
         return storeService.getProductsByCategory(category, pageable);
     }
 
-    @ResponseStatus(HttpStatus.OK)
-    @PutMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping
     public ProductDto createProduct(@RequestBody ProductDto productDto) {
         log.info("New product request{}", productDto);
         return storeService.createProduct(productDto);
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping
+    @PutMapping
     public ProductDto updateProduct(@RequestBody ProductDto productDto) {
         log.info("Update product request{}", productDto);
         return storeService.updateProduct(productDto);

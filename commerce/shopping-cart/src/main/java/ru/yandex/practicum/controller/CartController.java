@@ -35,7 +35,7 @@ public class CartController {
         return cartService.addProductsToCart(username, items);
     }
 
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping
     public void deleteUserCart(@RequestParam String username) {
         log.info("Request for cart deactivation for user{}", username);
