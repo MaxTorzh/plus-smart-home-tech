@@ -15,6 +15,6 @@ public class AddProductInWarehouse {
     private String productId;
 
     @NotBlank
-    @Min(value = 1, message = "Количество не может быть меньше 1")
+    @Min(value = 1, message = "Amount should not be less than 1")
     private int quantity;
 }

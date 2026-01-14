@@ -14,10 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Pageable {
-    @Min(value = 0, message = "page should not be less than 1")
+    @Min(value = 0, message = "Page should not be less than 1")
     private int page;
 
-    @Min(value = 1, message = "size should not be less than 1")
+    @Min(value = 1, message = "Size should not be less than 1")
     private int size;
 
     private List<String> sort = new ArrayList<>();

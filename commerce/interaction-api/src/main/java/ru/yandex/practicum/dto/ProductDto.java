@@ -29,11 +29,11 @@ public class ProductDto {
     @NotBlank
     private ProductState productState;
     @NotBlank
-    @Min(value = 1, message = "Рейтинг не может быть меньше 1")
-    @Max(value = 5, message = "Рейтинг не может быть больше 5")
+    @Min(value = 1, message = "Rating should not be less than 1")
+    @Max(value = 5, message = "Rating should not be more than 5")
     private int rating;
     private ProductCategory productCategory;
     @NotBlank
-    @Min(value = 1, message = "Стоимость не может быть меньше 1")
+    @Min(value = 1, message = "Price should not be less than 1")
     private float price;
 }

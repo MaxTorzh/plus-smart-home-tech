@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SizeDto {
     @NotBlank
-    @Min(value = 1, message = "Ширина не должна быть меньше 1")
+    @Min(value = 1, message = "Width should not be less than 1")
     private double width;
     @NotBlank
-    @Min(value = 1, message = "Высота не должна быть меньше 1")
+    @Min(value = 1, message = "Height should not be less than 1")
     private double height;
     @NotBlank
-    @Min(value = 1, message = "Глубина не должна быть меньше 1")
+    @Min(value = 1, message = "Depth should not be less than 1")
     private double depth;
 }

@@ -21,6 +21,6 @@ public class NewProductInWarehouse {
     private SizeDto dimension;
 
     @NotBlank
-    @Min(value = 1, message = "weight should not be less than 1")
+    @Min(value = 1, message = "Weight should not be less than 1")
     private double weight;
 }
