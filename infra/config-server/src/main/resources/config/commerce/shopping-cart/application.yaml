@@ -1,4 +1,16 @@
+server:
+  port: 0
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
 spring:
+  application:
+    name: shopping-cart
   jpa:
     hibernate:
       ddl-auto: none
@@ -13,3 +25,16 @@ spring:
     url: jdbc:postgresql://localhost:5433/commerce
     username: commerce
     password: commerce
+
+grpc:
+  server:
+    port: 9093
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
