@@ -1,5 +1,6 @@
 package ru.yandex.practicum.commerce.store.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,28 +31,28 @@ public class ShoppingStoreController {
 
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
-    public ProductDto createProduct(@RequestBody ProductDto productDto) {
+    public ProductDto createProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("PUT create product: {}", productDto);
         return shoppingStoreService.addProduct(productDto);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public ProductDto updateProduct(@RequestBody ProductDto productDto) {
+    public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("POST update product: {}", productDto);
         return shoppingStoreService.updateProduct(productDto);
     }
 
     @PostMapping("/removeProductFromStore")
     @ResponseStatus(HttpStatus.OK)
-    public boolean removeProduct(@RequestBody UUID productId) {
+    public boolean removeProduct(@Valid @RequestBody UUID productId) {
         log.info("POST remove product: {}", productId);
         return shoppingStoreService.removeProduct(productId);
     }
 
     @PostMapping("/quantityState")
     @ResponseStatus(HttpStatus.OK)
-    public boolean updateQuantityState(@RequestBody SetProductQuantityStateRequest request) {
+    public boolean updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
         log.info("POST update quantity state: {}", request);
         return shoppingStoreService.updateQuantityState(request);
     }
