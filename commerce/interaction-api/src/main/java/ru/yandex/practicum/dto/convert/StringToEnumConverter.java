@@ -1,4 +1,4 @@
-package ru.yandex.practicum.dto.converter;
+package ru.yandex.practicum.dto.convert;
 
 import java.util.Arrays;
 import lombok.Data;
