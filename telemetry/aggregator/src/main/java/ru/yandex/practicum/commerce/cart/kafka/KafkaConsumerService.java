@@ -1,4 +1,4 @@
-package ru.yandex.practicum.kafka;
+package ru.yandex.practicum.commerce.cart.kafka;
 
 import deserializer.SensorEventDeserializer;
 import org.apache.avro.specific.SpecificRecordBase;

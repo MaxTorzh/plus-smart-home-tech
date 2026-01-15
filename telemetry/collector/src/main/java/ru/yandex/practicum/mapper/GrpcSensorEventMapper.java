@@ -1,19 +1,8 @@
 package ru.yandex.practicum.mapper;
 
-
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.grpc.telemetry.event.ClimateSensorEventProto;
-import ru.yandex.practicum.grpc.telemetry.event.LightSensorEventProto;
-import ru.yandex.practicum.grpc.telemetry.event.MotionSensorEventProto;
-import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
-import ru.yandex.practicum.grpc.telemetry.event.SwitchSensorEventProto;
-import ru.yandex.practicum.grpc.telemetry.event.TemperatureSensorEventProto;
-import ru.yandex.practicum.kafka.telemetry.event.ClimateSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.LightSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.MotionSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.SwitchSensorAvro;
-import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
+import ru.yandex.practicum.grpc.telemetry.event.*;
+import ru.yandex.practicum.kafka.telemetry.event.*;
 
 import java.time.Instant;
 
