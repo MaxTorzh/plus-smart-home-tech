@@ -1,10 +1,14 @@
 package ru.yandex.practicum.commerce.warehouse.controller;
 
+import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.dto.warehouse.AssemblyProductsForOrderRequest;
+import ru.yandex.practicum.dto.warehouse.ShippedToDeliveryRequest;
 import ru.yandex.practicum.feign.WarehouseOperations;
 import ru.yandex.practicum.commerce.warehouse.service.WarehouseService;
 import ru.yandex.practicum.dto.cart.ShoppingCartDto;
@@ -54,5 +58,27 @@ public class WarehouseController implements WarehouseOperations {
         final AddressDto address = warehouseService.getAddress();
         log.info("Returning address from the city:{}.", address.getCity());
         return address;
+    }
+
+    @Override
+    public void sendToDelivery(final ShippedToDeliveryRequest request) {
+        log.info("Received request to send products to delivery service: {}.", request);
+        warehouseService.sendToDelivery(request);
+        log.info("Booking for order {} updated itd data with delivery info successfully.", request.getOrderId());
+    }
+
+    @Override
+    public void acceptReturn(final Map<UUID, Long> products) {
+        log.info("Received request to return products to warehouse {}.", products);
+        warehouseService.returnProducts(products);
+        log.info("Products returned to the warehouse successfully.");
+    }
+
+    @Override
+    public BookedProductsDto assembleProductsForOrder(final AssemblyProductsForOrderRequest request) {
+        log.info("Received request to book products for the order {}.", request.getOrderId());
+        final BookedProductsDto booking = warehouseService.bookProducts(request);
+        log.info("Returning info about booked products");
+        return null;
     }
 }
