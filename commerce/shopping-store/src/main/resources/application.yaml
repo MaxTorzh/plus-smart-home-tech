@@ -1,24 +1,21 @@
-server:
-  port: 0
-
-eureka:
-  instance:
-    hostname: localhost
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8761/eureka/
-
 spring:
   application:
     name: shopping-store
+
   config:
     import: "configserver:"
   cloud:
     config:
-      fail-fast: true
-      retry:
-        use-random-policy: true
-        max-interval: 6000
       discovery:
         enabled: true
-        service-id: config-server
+        serviceId: config-server
+      fail-fast: true
+      retry:
+        useRandomPolicy: true
+        max-interval: 10000
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    registerWithEureka: true

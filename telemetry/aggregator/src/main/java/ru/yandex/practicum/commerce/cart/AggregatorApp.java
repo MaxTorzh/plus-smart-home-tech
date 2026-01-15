@@ -1,10 +1,10 @@
-package ru.yandex.practicum;
+package ru.yandex.practicum.commerce.cart;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
-import ru.yandex.practicum.service.AggregationStarter;
+import ru.yandex.practicum.commerce.cart.service.AggregationStarter;
 
 /**
  * AggregatorApp is the main Spring Boot application class for the telemetry aggregator service.

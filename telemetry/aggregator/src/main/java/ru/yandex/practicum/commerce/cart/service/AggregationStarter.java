@@ -1,4 +1,4 @@
-package ru.yandex.practicum.service;
+package ru.yandex.practicum.commerce.cart.service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +10,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.kafka.KafkaConsumerService;
-import ru.yandex.practicum.kafka.KafkaProducerService;
+import ru.yandex.practicum.commerce.cart.kafka.KafkaConsumerService;
+import ru.yandex.practicum.commerce.cart.kafka.KafkaProducerService;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 
 import java.time.Duration;
