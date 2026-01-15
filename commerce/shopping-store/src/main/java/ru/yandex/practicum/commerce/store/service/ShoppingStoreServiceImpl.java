@@ -3,13 +3,13 @@ package ru.yandex.practicum.commerce.store.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dto.product.ProductCategory;
 import ru.yandex.practicum.dto.product.ProductDto;
 import ru.yandex.practicum.dto.product.ProductState;
+import ru.yandex.practicum.dto.product.QuantityState;
 import ru.yandex.practicum.dto.product.SetProductQuantityStateRequest;
 import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.commerce.store.mapper.ProductMapper;
@@ -17,11 +17,9 @@ import ru.yandex.practicum.commerce.store.model.Product;
 import ru.yandex.practicum.commerce.store.repository.ProductRepository;
 import ru.yandex.practicum.commerce.store.utility.UuidGenerator;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * Implementation of {@link ShoppingStoreService} for managing products in the shopping store.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,94 +30,160 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<ProductDto> getProductsByCategory(final ProductCategory category,
-                                                  final Pageable pageable) {
-        log.debug("Retrieving products for category: {}, page: {}, size: {}, sortBy: {}...",
-                category, pageable.getPageNumber(), pageable.getPageSize(), pageable.getSort());
-        final PageRequest page = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                pageable.getSort());
-        final Page<Product> products = productRepository.findAllByProductCategory(category, page);
-        return products.map(ProductMapper::toDto);
+    public Page<ProductDto> getProductsByCategory(ProductCategory category, Pageable pageable) {
+        log.debug("Getting products by category: {}, pageable: {}", category, pageable);
+        return productRepository.findAllByProductCategory(category, pageable)
+                .map(ProductMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public ProductDto getProductById(final UUID productId) {
-        log.debug("Retrieving details of the product with ID {}...", productId);
-        final Product product = getProductOrThrow(productId);
-        log.debug("Successfully retrieved product: {}", product);
+    public Page<ProductDto> getAllProducts(Pageable pageable) {
+        log.debug("Getting all products with pageable: {}", pageable);
+        return productRepository.findAll(pageable)
+                .map(ProductMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public ProductDto getProductById(UUID productId) {
+        log.debug("Getting product by ID: {}", productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId));
         return ProductMapper.toDto(product);
     }
 
     @Transactional
     @Override
-    public ProductDto addProduct(final ProductDto productDto) {
-        log.debug("Saving new product info to the DB: {}...", productDto);
-        setId(productDto);
-        final Product productToSave = ProductMapper.toEntity(productDto);
-        final Product savedProduct = productRepository.save(productToSave);
-        log.debug("New product saved successfully with ID: {}.", savedProduct.getProductId());
+    public ProductDto addProduct(ProductDto productDto) {
+        log.debug("Adding new product: {}", productDto);
+
+        if (productDto.getProductId() == null) {
+            productDto.setProductId(uuidGenerator.generate());
+        }
+
+        if (productRepository.existsById(productDto.getProductId())) {
+            throw new IllegalArgumentException("Product with ID " + productDto.getProductId() + " already exists");
+        }
+
+        validateProductDto(productDto);
+
+        setDefaultValues(productDto);
+
+        Product product = ProductMapper.toEntity(productDto);
+        Product savedProduct = productRepository.save(product);
+        log.info("Product created with ID: {}", savedProduct.getProductId());
         return ProductMapper.toDto(savedProduct);
     }
 
     @Transactional
     @Override
-    public ProductDto updateProduct(final ProductDto productDto) {
-        log.debug("Updating a product info with details: {}...", productDto);
-        final Product product = getProductOrThrow(productDto.getProductId());
-        updateProductContent(product, productDto);
-        final Product updatedProduct = productRepository.save(product);
-        log.debug("Updated product: {}.", updatedProduct);
+    public ProductDto updateProduct(ProductDto productDto) {
+        log.debug("Updating product: {}", productDto);
+
+        if (productDto.getProductId() == null) {
+            throw new IllegalArgumentException("Product ID is required for update");
+        }
+
+        Product product = productRepository.findById(productDto.getProductId())
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productDto.getProductId()));
+
+        updateProductFields(product, productDto);
+
+        Product updatedProduct = productRepository.save(product);
+        log.info("Product updated with ID: {}", updatedProduct.getProductId());
         return ProductMapper.toDto(updatedProduct);
     }
 
     @Transactional
     @Override
-    public boolean updateQuantityState(final SetProductQuantityStateRequest request) {
-        log.debug("Updating quantity state for the product ID {} - {}.",
-                request.getProductId(), request.getQuantityState());
-        final Product product = getProductOrThrow(request.getProductId());
+    public boolean updateQuantityState(SetProductQuantityStateRequest request) {
+        log.debug("Updating quantity state: {}", request);
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + request.getProductId()));
+
         product.setQuantityState(request.getQuantityState());
-        final Product updatedProduct = productRepository.save(product);
-        log.debug("Updated quantity state for the product ID {} - {}.",
-                updatedProduct.getProductId(), updatedProduct.getQuantityState());
+        productRepository.save(product);
+        log.info("Quantity state updated for product ID: {}", product.getProductId());
         return true;
     }
 
     @Transactional
     @Override
-    public boolean removeProduct(final UUID productId) {
-        log.debug("Setting product with ID {} with the state 'DEACTIVATE'.", productId);
-        final Product product = getProductOrThrow(productId);
+    public boolean removeProduct(UUID productId) {
+        log.debug("Removing product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + productId));
+
         product.setProductState(ProductState.DEACTIVATE);
-        final Product updatedProduct = productRepository.save(product);
-        log.debug("Updated product state: {}.", updatedProduct);
+        productRepository.save(product);
+        log.info("Product deactivated with ID: {}", product.getProductId());
         return true;
     }
 
-    private void updateProductContent(final Product target, final ProductDto source) {
-        target.setProductName(
-                source.getProductName() != null ? source.getProductName() : target.getProductName());
-        target.setDescription(
-                source.getDescription() != null ? source.getDescription() : target.getDescription());
-        target.setImageSrc(source.getImageSrc() != null ? source.getImageSrc() : target.getImageSrc());
-        target.setQuantityState(
-                source.getQuantityState() != null ? source.getQuantityState() : target.getQuantityState());
-        target.setProductState(
-                source.getProductState() != null ? source.getProductState() : target.getProductState());
-        target.setProductCategory(source.getProductCategory() != null ? source.getProductCategory()
-                : target.getProductCategory());
-        target.setPrice(source.getPrice() != null ? source.getPrice() : target.getPrice());
-    }
-
-    private void setId(final ProductDto productDto) {
-        if (productDto.getProductId() == null) {
-            productDto.setProductId(uuidGenerator.generate());
+    private void validateProductDto(ProductDto productDto) {
+        if (productDto.getProductName() == null || productDto.getProductName().isBlank()) {
+            throw new IllegalArgumentException("Product name is required");
+        }
+        if (productDto.getDescription() == null || productDto.getDescription().isBlank()) {
+            throw new IllegalArgumentException("Description is required");
+        }
+        if (productDto.getPrice() == null || productDto.getPrice().compareTo(BigDecimal.ONE) < 0) {
+            throw new IllegalArgumentException("Price must be at least 1");
+        }
+        if (productDto.getQuantityState() == null) {
+            throw new IllegalArgumentException("Quantity state is required");
+        }
+        if (productDto.getProductState() == null) {
+            throw new IllegalArgumentException("Product state is required");
         }
     }
 
-    private Product getProductOrThrow(UUID productId) {
-        return productRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("ID: " + productId));
+    private void setDefaultValues(ProductDto productDto) {
+        if (productDto.getProductState() == null) {
+            productDto.setProductState(ProductState.ACTIVE);
+        }
+        if (productDto.getQuantityState() == null) {
+            productDto.setQuantityState(QuantityState.ENOUGH);
+        }
+        if (productDto.getRating() == null) {
+            productDto.setRating(BigDecimal.ZERO.setScale(1));
+        }
+    }
+
+    private void updateProductFields(Product product, ProductDto productDto) {
+        if (productDto.getProductName() != null && !productDto.getProductName().isBlank()) {
+            product.setProductName(productDto.getProductName());
+        }
+        if (productDto.getDescription() != null && !productDto.getDescription().isBlank()) {
+            product.setDescription(productDto.getDescription());
+        }
+        if (productDto.getImageSrc() != null) {
+            product.setImageSrc(productDto.getImageSrc());
+        }
+        if (productDto.getQuantityState() != null) {
+            product.setQuantityState(productDto.getQuantityState());
+        }
+        if (productDto.getProductState() != null) {
+            product.setProductState(productDto.getProductState());
+        }
+        if (productDto.getProductCategory() != null) {
+            product.setProductCategory(productDto.getProductCategory());
+        }
+        if (productDto.getPrice() != null) {
+            if (productDto.getPrice().compareTo(BigDecimal.ONE) < 0) {
+                throw new IllegalArgumentException("Price must be at least 1");
+            }
+            product.setPrice(productDto.getPrice());
+        }
+        if (productDto.getRating() != null) {
+            if (productDto.getRating().compareTo(BigDecimal.ZERO) < 0 ||
+                    productDto.getRating().compareTo(new BigDecimal("5.0")) > 0) {
+                throw new IllegalArgumentException("Rating must be between 0.0 and 5.0");
+            }
+            product.setRating(productDto.getRating());
+        }
     }
 }

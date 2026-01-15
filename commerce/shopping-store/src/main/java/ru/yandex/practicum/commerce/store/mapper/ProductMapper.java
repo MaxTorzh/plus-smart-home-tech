@@ -5,18 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.dto.product.ProductDto;
 import ru.yandex.practicum.commerce.store.model.Product;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
-/**
- * Interface for mapping between Product and ProductDto objects.
- */
 @UtilityClass
 @Slf4j
 public class ProductMapper {
 
-    public Product toEntity(final ProductDto productDto) {
-        log.debug("Mapping ProductDto {} to Product.", productDto);
-        Objects.requireNonNull(productDto);
+    public Product toEntity(ProductDto productDto) {
+        Objects.requireNonNull(productDto, "ProductDto cannot be null");
+
         return Product.builder()
                 .productId(productDto.getProductId())
                 .productName(productDto.getProductName())
@@ -26,12 +24,14 @@ public class ProductMapper {
                 .productState(productDto.getProductState())
                 .productCategory(productDto.getProductCategory())
                 .price(productDto.getPrice())
+                .rating(productDto.getRating() != null ?
+                        productDto.getRating().setScale(1) : BigDecimal.ZERO.setScale(1))
                 .build();
     }
 
-    public ProductDto toDto(final Product product) {
-        log.debug("Mapping Product {} to ProductDto.", product);
-        Objects.requireNonNull(product);
+    public ProductDto toDto(Product product) {
+        Objects.requireNonNull(product, "Product cannot be null");
+
         return ProductDto.builder()
                 .productId(product.getProductId())
                 .productName(product.getProductName())
@@ -41,6 +41,7 @@ public class ProductMapper {
                 .productState(product.getProductState())
                 .productCategory(product.getProductCategory())
                 .price(product.getPrice())
+                .rating(product.getRating())
                 .build();
     }
 }

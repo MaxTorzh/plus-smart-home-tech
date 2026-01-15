@@ -11,9 +11,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * DTO class representing product information.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,4 +39,7 @@ public class ProductDto {
     @Digits(integer = 19, fraction = 2)
     @DecimalMin(value = "1.0")
     private BigDecimal price;
+
+    @Digits(integer = 1, fraction = 1)
+    private BigDecimal rating;
 }

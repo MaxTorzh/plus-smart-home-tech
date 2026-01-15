@@ -9,9 +9,6 @@ import ru.yandex.practicum.dto.product.QuantityState;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * Entity representing a product in the store.
- */
 @Entity
 @Table(name = "products", schema = "store")
 @Getter
@@ -50,4 +47,6 @@ public class Product {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price;
 
+    @Column(precision = 2, scale = 1)
+    private BigDecimal rating;
 }
