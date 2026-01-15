@@ -1,84 +1,72 @@
 package ru.yandex.practicum.commerce.warehouse.controller;
 
-import java.util.Map;
-import java.util.UUID;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.dto.warehouse.AssemblyProductsForOrderRequest;
-import ru.yandex.practicum.dto.warehouse.ShippedToDeliveryRequest;
-import ru.yandex.practicum.feign.WarehouseOperations;
-import ru.yandex.practicum.commerce.warehouse.service.WarehouseService;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.cart.ShoppingCartDto;
-import ru.yandex.practicum.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.dto.warehouse.AddressDto;
-import ru.yandex.practicum.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.dto.warehouse.NewProductInWarehouseRequest;
+import ru.yandex.practicum.dto.warehouse.*;
+import ru.yandex.practicum.commerce.warehouse.service.WarehouseService;
 
-/**
- * REST controller for managing warehouse operations.
- */
+import java.util.Map;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/warehouse")
 @RequiredArgsConstructor
-@Validated
 @Slf4j
-public class WarehouseController implements WarehouseOperations {
+public class WarehouseController {
 
     private final WarehouseService warehouseService;
 
-    @Override
-    public void addProduct(final NewProductInWarehouseRequest product) {
-        log.info("Received request to add a new product ID {} to the warehouse", product.getProductId());
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    public void addProduct(@Valid @RequestBody NewProductInWarehouseRequest product) {
+        log.info("POST add product to warehouse: {}", product);
         warehouseService.addNewProduct(product);
-        log.info("Product added successfully.");
     }
 
-    @Override
-    public void increaseProductQuantity(final AddProductToWarehouseRequest request) {
-        log.info("Received request to increase quantity of the product: {}.",request.getProductId());
+    @PutMapping("/add")
+    @ResponseStatus(HttpStatus.OK)
+    public void increaseProductQuantity(@Valid @RequestBody AddProductToWarehouseRequest request) {
+        log.info("PUT increase product quantity: {}", request);
         warehouseService.increaseProductQuantity(request);
-        log.info("Product quantity increased successfully.");
     }
 
-    @Override
-    public BookedProductsDto checkStock(final ShoppingCartDto shoppingCart) {
-        log.info("Received request to check stock for the products in the shopping cart {}.",
-                shoppingCart.getShoppingCartId());
-        final BookedProductsDto bookedProducts = warehouseService.checkStock(shoppingCart);
-        log.info("Returning general information about shopping cart.");
-        return bookedProducts;
+    @PutMapping("/check")
+    @ResponseStatus(HttpStatus.OK)
+    public BookedProductsDto checkStock(@Valid @RequestBody ShoppingCartDto shoppingCart) {
+        log.info("PUT check stock for cart: {}", shoppingCart.getShoppingCartId());
+        return warehouseService.checkStock(shoppingCart);
     }
 
-    @Override
+    @GetMapping("/address")
+    @ResponseStatus(HttpStatus.OK)
     public AddressDto getWarehouseAddress() {
-        log.info("Received request to get an address for the warehouse");
-        final AddressDto address = warehouseService.getAddress();
-        log.info("Returning address from the city:{}.", address.getCity());
-        return address;
+        log.info("GET warehouse address");
+        return warehouseService.getAddress();
     }
 
-    @Override
-    public void sendToDelivery(final ShippedToDeliveryRequest request) {
-        log.info("Received request to send products to delivery service: {}.", request);
+    @PutMapping("/shipped")
+    @ResponseStatus(HttpStatus.OK)
+    public void sendToDelivery(@Valid @RequestBody ShippedToDeliveryRequest request) {
+        log.info("PUT send to delivery: {}", request);
         warehouseService.sendToDelivery(request);
-        log.info("Booking for order {} updated itd data with delivery info successfully.", request.getOrderId());
     }
 
-    @Override
-    public void acceptReturn(final Map<UUID, Long> products) {
-        log.info("Received request to return products to warehouse {}.", products);
+    @PutMapping("/return")
+    @ResponseStatus(HttpStatus.OK)
+    public void acceptReturn(@RequestBody Map<UUID, Long> products) {
+        log.info("PUT accept return: {}", products);
         warehouseService.returnProducts(products);
-        log.info("Products returned to the warehouse successfully.");
     }
 
-    @Override
-    public BookedProductsDto assembleProductsForOrder(final AssemblyProductsForOrderRequest request) {
-        log.info("Received request to book products for the order {}.", request.getOrderId());
-        final BookedProductsDto booking = warehouseService.bookProducts(request);
-        log.info("Returning info about booked products");
-        return null;
+    @PutMapping("/assembly")
+    @ResponseStatus(HttpStatus.OK)
+    public BookedProductsDto assembleProductsForOrder(
+            @Valid @RequestBody AssemblyProductsForOrderRequest request) {
+        log.info("PUT assemble products for order: {}", request.getOrderId());
+        return warehouseService.bookProducts(request);  // НЕ возвращать null!
     }
 }
