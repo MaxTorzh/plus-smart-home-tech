@@ -51,6 +51,7 @@ public class ShoppingCart {
             joinColumns = @JoinColumn(name = "cart_id"))
     @MapKeyColumn(name = "product_id")
     @Column(name = "quantity")
+    @Builder.Default
     private Map<UUID, Long> products = new HashMap<>();
 }
 
