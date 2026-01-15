@@ -1,9 +1,8 @@
 package ru.yandex.practicum.dto;
 
-
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,27 +12,32 @@ import ru.yandex.practicum.types.ProductState;
 import ru.yandex.practicum.types.QuantityState;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ProductDto {
-    @NotBlank
+
     private String productId;
-    @NotBlank
+
+    @NotBlank(message = "Product name cannot be blank")
     private String productName;
-    @NotBlank
+
+    @NotBlank(message = "Description cannot be blank")
     private String description;
+
     private String imageSrc;
-    @NotBlank
+
+    @NotNull(message = "Quantity state cannot be null")
     private QuantityState quantityState;
-    @NotBlank
+
+    @NotNull(message = "Product state cannot be null")
     private ProductState productState;
-    @NotBlank
-    @Min(value = 1, message = "Rating should not be less than 1")
-    @Max(value = 5, message = "Rating should not be more than 5")
-    private int rating;
+
+    private Integer rating;
+
     private ProductCategory productCategory;
-    @NotBlank
-    @Min(value = 1, message = "Price should not be less than 1")
-    private float price;
+
+    @NotNull(message = "Price cannot be null")
+    @Min(value = 0, message = "Price must be greater than or equal to 0")
+    private Float price;
 }
