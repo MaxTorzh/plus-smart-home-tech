@@ -39,7 +39,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleFeignException(final FeignException ex) {
         log.warn("Feign Client Exception: {} - Status: {}", ex.getMessage(), ex.status(), ex);
 
-        // Безопасное получение HttpStatus
         HttpStatus status;
         try {
             status = ex.status() > 0 ? HttpStatus.valueOf(ex.status())
@@ -105,7 +104,7 @@ public class GlobalExceptionHandler {
         String supportedMethods = "";
         if (ex.getSupportedHttpMethods() != null) {
             supportedMethods = ex.getSupportedHttpMethods().stream()
-                    .map(HttpMethod::name)  // Используем HttpMethod::name
+                    .map(HttpMethod::name)
                     .collect(Collectors.joining(", "));
         }
 
@@ -118,5 +117,22 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+            final IllegalArgumentException ex) {
+
+        log.warn("Illegal argument: {}", ex.getMessage(), ex);
+
+        final ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                ex.getMessage(),
+                LocalDateTime.now(),
+                "Invalid input parameter"
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
