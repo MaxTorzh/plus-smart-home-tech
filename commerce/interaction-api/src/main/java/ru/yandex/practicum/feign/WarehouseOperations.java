@@ -12,7 +12,7 @@ import java.util.UUID;
 @FeignClient(name = "warehouse", path = "/api/v1/warehouse")
 public interface WarehouseOperations {
 
-    @PostMapping
+    @PutMapping
     void addProduct(@Valid @RequestBody NewProductInWarehouseRequest product);
 
     @PutMapping("/check")

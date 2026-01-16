@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.product.*;
 import ru.yandex.practicum.commerce.store.service.ShoppingStoreService;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class ShoppingStoreController {
 
     private final ShoppingStoreService shoppingStoreService;
@@ -29,17 +31,17 @@ public class ShoppingStoreController {
         return shoppingStoreService.getProductsByCategory(category, pageable);
     }
 
-    @PutMapping
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ProductDto createProduct(@Valid @RequestBody ProductDto productDto) {
-        log.info("PUT create product: {}", productDto);
+        log.info("POST create product: {}", productDto);
         return shoppingStoreService.addProduct(productDto);
     }
 
-    @PostMapping
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) {
-        log.info("POST update product: {}", productDto);
+        log.info("PUT update product: {}", productDto);
         return shoppingStoreService.updateProduct(productDto);
     }
 
@@ -52,7 +54,7 @@ public class ShoppingStoreController {
 
     @PostMapping("/quantityState")
     @ResponseStatus(HttpStatus.OK)
-    public boolean updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
+    public ProductDto updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
         log.info("POST update quantity state: {}", request);
         return shoppingStoreService.updateQuantityState(request);
     }

@@ -25,15 +25,15 @@ public interface ShoppingStoreOperations {
     @GetMapping("/products")
     Page<ProductDto> getAllProducts(Pageable pageable);
 
-    @PutMapping
+    @PostMapping
     ProductDto createProduct(@Valid @RequestBody ProductDto productDto);
 
-    @PostMapping
+    @PutMapping
     ProductDto updateProduct(@Valid @RequestBody ProductDto productDto);
 
     @PostMapping("/removeProductFromStore")
     boolean removeProduct(@RequestBody UUID productId);
 
     @PostMapping("/quantityState")
-    boolean updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request);
+    ProductDto updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request);
 }

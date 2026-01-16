@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.cart.ShoppingCartDto;
 import ru.yandex.practicum.dto.warehouse.*;
@@ -16,14 +17,15 @@ import java.util.UUID;
 @RequestMapping("/api/v1/warehouse")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class WarehouseController {
 
     private final WarehouseService warehouseService;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.OK)
+    @PutMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public void addProduct(@Valid @RequestBody NewProductInWarehouseRequest product) {
-        log.info("POST add product to warehouse: {}", product);
+        log.info("PUT add product to warehouse: {}", product);
         warehouseService.addNewProduct(product);
     }
 
