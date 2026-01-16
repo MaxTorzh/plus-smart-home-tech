@@ -5,10 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {
-        "ru.yandex.practicum.commerce.warehouse",
-        "ru.yandex.practicum.exception.handler"
-})
 public class WarehouseApp {
 
     public static void main(String[] args) {

@@ -4,7 +4,7 @@ spring:
 
   datasource:
     driverClassName: "org.postgresql.Driver"
-    url: "jdbc:postgresql://localhost:5433/sht?currentSchema=store"  #5432
+    url: "jdbc:postgresql://localhost:5432/sht?currentSchema=store"  #5432
     username: "sh"
     password: "sh"
 

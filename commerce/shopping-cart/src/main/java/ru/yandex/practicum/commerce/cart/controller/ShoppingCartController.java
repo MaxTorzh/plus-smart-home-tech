@@ -30,7 +30,7 @@ public class ShoppingCartController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto addProductToCart(
+    public ShoppingCartDto addProductToCart(@Valid
             @RequestBody Map<UUID, Long> products,
             @RequestParam String username) {
         log.info("POST add products to cart for user: {}, products: {}", username, products);
@@ -46,7 +46,7 @@ public class ShoppingCartController {
 
     @PutMapping("/remove")
     @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto removeProductsFromCart(
+    public ShoppingCartDto removeProductsFromCart(@Valid
             @RequestParam String username,
             @RequestBody Set<UUID> products) {
         log.info("PUT remove products from cart for user: {}, products: {}", username, products);
@@ -55,7 +55,7 @@ public class ShoppingCartController {
 
     @PutMapping("/change-quantity")
     @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto changeQuantity(
+    public ShoppingCartDto changeQuantity(@Valid
             @RequestParam String username,
             @Valid @RequestBody ChangeProductQuantityRequest request) {
         log.info("PUT change quantity for user: {}, request: {}", username, request);

@@ -60,7 +60,6 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
     private ResolvedFeignError extractFeignErrorDetails(final String methodKey,
                                                         final Response response) throws IOException {
-        // Копируем тело ответа в байтовый массив
         byte[] bodyBytes;
         try (InputStream bodyIs = response.body().asInputStream()) {
             bodyBytes = bodyIs.readAllBytes();
@@ -71,14 +70,12 @@ public class FeignErrorDecoder implements ErrorDecoder {
         }
 
         try {
-            // Парсим JSON
             final ErrorResponse body = objectMapper.readValue(bodyBytes, ErrorResponse.class);
             final String code = body.code();
             final String message = body.message();
             final ExceptionReason reason = resolveReasonByCode(code);
             return new ResolvedFeignError(code, message, reason);
         } catch (JsonProcessingException e) {
-            // Если не JSON, возвращаем как строку
             String rawBody = new String(bodyBytes, StandardCharsets.UTF_8);
             return new ResolvedFeignError("INVALID_RESPONSE_FORMAT",
                     "Invalid error response format: " + rawBody, null);

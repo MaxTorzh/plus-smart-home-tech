@@ -7,10 +7,6 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @EnableFeignClients(basePackages = "ru.yandex.practicum.feign")
-@ComponentScan(basePackages = {
-        "ru.yandex.practicum.commerce.cart",
-        "ru.yandex.practicum.exception.handler"
-})
 public class ShoppingCartApp {
 
     public static void main(String[] args) {
