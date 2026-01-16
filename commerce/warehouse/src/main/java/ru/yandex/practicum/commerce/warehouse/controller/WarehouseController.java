@@ -29,17 +29,17 @@ public class WarehouseController {
         warehouseService.addNewProduct(product);
     }
 
-    @PutMapping("/add")
+    @PostMapping("/add")
     @ResponseStatus(HttpStatus.OK)
     public void increaseProductQuantity(@Valid @RequestBody AddProductToWarehouseRequest request) {
-        log.info("PUT increase product quantity: {}", request);
+        log.info("POST increase product quantity: {}", request);
         warehouseService.increaseProductQuantity(request);
     }
 
-    @PutMapping("/check")
+    @PostMapping("/check")
     @ResponseStatus(HttpStatus.OK)
     public BookedProductsDto checkStock(@Valid @RequestBody ShoppingCartDto shoppingCart) {
-        log.info("PUT check stock for cart: {}", shoppingCart.getShoppingCartId());
+        log.info("POST check stock for cart: {}", shoppingCart.getShoppingCartId());
         return warehouseService.checkStock(shoppingCart);
     }
 

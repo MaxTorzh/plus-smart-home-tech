@@ -95,21 +95,18 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
         return ProductMapper.toDto(updatedProduct);
     }
 
-    public ProductDto updateQuantityState(SetProductQuantityStateRequest request) {
+    @Transactional
+    @Override
+    public boolean updateQuantityState(SetProductQuantityStateRequest request) {
         log.debug("Updating quantity state: {}", request);
+
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new ProductNotFoundException(
-                        "Product not found: " + request.getProductId()));
+                .orElseThrow(() -> new ProductNotFoundException("Product not found: " + request.getProductId()));
 
-        if (request.getQuantityState() == null) {
-            throw new IllegalArgumentException("Quantity state cannot be null");
-        }
         product.setQuantityState(request.getQuantityState());
-
-        Product updatedProduct = productRepository.save(product);
+        productRepository.save(product);
         log.info("Quantity state updated for product ID: {}", product.getProductId());
-
-        return ProductMapper.toDto(updatedProduct);
+        return true;
     }
 
     @Transactional

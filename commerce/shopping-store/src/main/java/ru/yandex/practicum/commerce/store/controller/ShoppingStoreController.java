@@ -31,17 +31,17 @@ public class ShoppingStoreController {
         return shoppingStoreService.getProductsByCategory(category, pageable);
     }
 
-    @PostMapping
+    @PutMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProductDto createProduct(@Valid @RequestBody ProductDto productDto) {
-        log.info("POST create product: {}", productDto);
+        log.info("PUT create product: {}", productDto);
         return shoppingStoreService.addProduct(productDto);
     }
 
-    @PutMapping
+    @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) {
-        log.info("PUT update product: {}", productDto);
+        log.info("POST update product: {}", productDto);
         return shoppingStoreService.updateProduct(productDto);
     }
 
@@ -54,7 +54,7 @@ public class ShoppingStoreController {
 
     @PostMapping("/quantityState")
     @ResponseStatus(HttpStatus.OK)
-    public ProductDto updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
+    public boolean updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
         log.info("POST update quantity state: {}", request);
         return shoppingStoreService.updateQuantityState(request);
     }

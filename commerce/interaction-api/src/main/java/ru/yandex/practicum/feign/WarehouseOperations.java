@@ -15,10 +15,10 @@ public interface WarehouseOperations {
     @PutMapping
     void addProduct(@Valid @RequestBody NewProductInWarehouseRequest product);
 
-    @PutMapping("/check")
+    @PostMapping("/check")
     BookedProductsDto checkStock(@Valid @RequestBody ShoppingCartDto shoppingCart);
 
-    @PutMapping("/add")
+    @PostMapping("/add")
     void increaseProductQuantity(@Valid @RequestBody AddProductToWarehouseRequest request);
 
     @GetMapping("/address")

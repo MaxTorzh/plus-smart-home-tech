@@ -20,7 +20,7 @@ public interface ShoppingCartOperations {
     @GetMapping
     ShoppingCartDto getShoppingCart(@RequestParam @NotBlank String username);
 
-    @PostMapping
+    @PutMapping
     ShoppingCartDto addProductToCart(
             @RequestBody @NotEmpty Map<@NotNull UUID, @NotNull @Positive Long> products,
             @RequestParam @NotBlank String username);
@@ -28,12 +28,12 @@ public interface ShoppingCartOperations {
     @DeleteMapping
     void deactivateCurrentCart(@RequestParam @NotBlank String username);
 
-    @PutMapping("/remove")
+    @PostMapping("/remove")
     ShoppingCartDto removeProductsFromCart(
             @RequestParam @NotBlank String username,
             @RequestBody Set<@NotNull UUID> products);
 
-    @PutMapping("/change-quantity")
+    @PostMapping("/change-quantity")
     ShoppingCartDto changeQuantity(
             @RequestParam @NotBlank String username,
             @RequestBody @Valid ChangeProductQuantityRequest request);

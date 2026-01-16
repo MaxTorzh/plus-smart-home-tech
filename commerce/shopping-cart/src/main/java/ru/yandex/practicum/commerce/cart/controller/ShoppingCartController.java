@@ -35,12 +35,12 @@ public class ShoppingCartController {
         return shoppingCartService.getShoppingCart(username);
     }
 
-    @PostMapping
+    @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto addProductToCart(
             @Valid @NotEmpty @RequestBody Map<@NotNull UUID, @NotNull @Positive Long> products,
             @Valid @RequestParam @NotBlank String username) {
-        log.info("POST add products to cart for user: {}, products: {}", username, products);
+        log.info("PUT add products to cart for user: {}, products: {}", username, products);
         return shoppingCartService.addProductsToCart(username, products);
     }
 
@@ -52,21 +52,21 @@ public class ShoppingCartController {
         shoppingCartService.deactivateShoppingCart(username);
     }
 
-    @PutMapping("/remove")
+    @PostMapping("/remove")
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto removeProductsFromCart(
             @Valid @RequestParam @NotBlank String username,
             @Valid @NotEmpty @RequestBody Set<@NotNull UUID> products) {
-        log.info("PUT remove products from cart for user: {}, products: {}", username, products);
+        log.info("POST remove products from cart for user: {}, products: {}", username, products);
         return shoppingCartService.retainProductsInTheCart(username, products);
     }
 
-    @PutMapping("/change-quantity")
+    @PostMapping("/change-quantity")
     @ResponseStatus(HttpStatus.OK)
     public ShoppingCartDto changeQuantity(
             @Valid @RequestParam @NotBlank String username,
             @Valid @RequestBody ChangeProductQuantityRequest request) {
-        log.info("PUT change quantity for user: {}, request: {}", username, request);
+        log.info("POST change quantity for user: {}, request: {}", username, request);
         return shoppingCartService.changeProductQuantity(username, request);
     }
 }
