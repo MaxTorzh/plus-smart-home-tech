@@ -2,8 +2,10 @@ package ru.yandex.practicum.exception.handler;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -92,5 +94,29 @@ public class GlobalExceptionHandler {
                 "Refer to server logs for details."
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException ex) {
+
+        log.warn("HTTP Method not supported: {}", ex.getMessage());
+
+        String supportedMethods = "";
+        if (ex.getSupportedHttpMethods() != null) {
+            supportedMethods = ex.getSupportedHttpMethods().stream()
+                    .map(HttpMethod::name)  // Используем HttpMethod::name
+                    .collect(Collectors.joining(", "));
+        }
+
+        final ErrorResponse response = new ErrorResponse(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "METHOD_NOT_ALLOWED",
+                "HTTP method " + ex.getMethod() + " is not supported for this endpoint",
+                LocalDateTime.now(),
+                "Supported methods: " + supportedMethods
+        );
+
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
     }
 }
