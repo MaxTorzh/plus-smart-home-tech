@@ -1,22 +1,22 @@
 package ru.yandex.practicum.exception.decoder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.Response;
 import feign.codec.ErrorDecoder;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import ru.yandex.practicum.exception.ApiException;
 import ru.yandex.practicum.exception.ExceptionReason;
 import ru.yandex.practicum.exception.dto.ErrorResponse;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 /**
- * A custom Feign {@link ErrorDecoder} implementation, to handle errors from Feign Clients. Decodes
- * the given Feign response into an application-specific exception, providing meaningful exception
- * propagation from remote services. Uses Feign default decoder to return a generic fallback
- * exception.
+ * A custom Feign {@link ErrorDecoder} implementation, to handle errors from Feign Clients.
  */
 @Slf4j
 public class FeignErrorDecoder implements ErrorDecoder {
@@ -33,8 +33,8 @@ public class FeignErrorDecoder implements ErrorDecoder {
         final HttpStatus httpStatus = HttpStatus.resolve(response.status());
 
         if (response.body() == null) {
-            log.warn("Feign Client call to {} failed with status {} and empty body.", methodKey,
-                    httpStatus);
+            log.warn("Feign Client call to {} failed with status {} and empty body.",
+                    methodKey, httpStatus);
             return fallbackException(methodKey, response);
         }
 
@@ -45,29 +45,43 @@ public class FeignErrorDecoder implements ErrorDecoder {
                 log.warn("Feign call to {} failed with code {}: {}",
                         methodKey, feignError.code, feignError.message);
                 return new ApiException(feignError.reason,
-                        "Feign error from " + methodKey + "details: " + feignError.message);
+                        "Feign error from " + methodKey + " details: " + feignError.message);
             } else {
                 log.warn("Feign call to {} failed with unknown code '{}': {}",
                         methodKey, feignError.code, feignError.message);
                 return fallbackException(methodKey, response);
             }
         } catch (IOException ex) {
-            log.error("Feign: failed to decode feign error received from {}: {}", methodKey,
-                    ex.getMessage());
+            log.error("Feign: failed to decode feign error received from {}: {}",
+                    methodKey, ex.getMessage());
             return fallbackException(methodKey, response);
         }
-
     }
 
     private ResolvedFeignError extractFeignErrorDetails(final String methodKey,
                                                         final Response response) throws IOException {
-        log.debug("Extracting Feign Error details 1 out of response from {}.", methodKey);
+        // Копируем тело ответа в байтовый массив
+        byte[] bodyBytes;
         try (InputStream bodyIs = response.body().asInputStream()) {
-            final ErrorResponse body = objectMapper.readValue(bodyIs, ErrorResponse.class);
+            bodyBytes = bodyIs.readAllBytes();
+        }
+
+        if (bodyBytes.length == 0) {
+            return new ResolvedFeignError("NO_BODY", "Empty response body", null);
+        }
+
+        try {
+            // Парсим JSON
+            final ErrorResponse body = objectMapper.readValue(bodyBytes, ErrorResponse.class);
             final String code = body.code();
             final String message = body.message();
             final ExceptionReason reason = resolveReasonByCode(code);
             return new ResolvedFeignError(code, message, reason);
+        } catch (JsonProcessingException e) {
+            // Если не JSON, возвращаем как строку
+            String rawBody = new String(bodyBytes, StandardCharsets.UTF_8);
+            return new ResolvedFeignError("INVALID_RESPONSE_FORMAT",
+                    "Invalid error response format: " + rawBody, null);
         }
     }
 
@@ -80,11 +94,11 @@ public class FeignErrorDecoder implements ErrorDecoder {
     }
 
     private Exception fallbackException(final String methodKey, final Response response) {
-        log.error("Feign default exception. MethodKey:{}, HttpStatus:{}", methodKey, response.status());
+        log.error("Feign default exception. MethodKey:{}, HttpStatus:{}",
+                methodKey, response.status());
         return defaultDecoder.decode(methodKey, response);
     }
 
     private record ResolvedFeignError(String code, String message, ExceptionReason reason) {
-
     }
 }

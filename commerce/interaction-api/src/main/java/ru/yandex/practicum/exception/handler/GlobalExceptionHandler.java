@@ -1,18 +1,24 @@
 package ru.yandex.practicum.exception.handler;
 
-import java.time.LocalDateTime;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.yandex.practicum.exception.ApiException;
 import ru.yandex.practicum.exception.dto.ErrorResponse;
+
+import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 /**
  * Global API exception handler responsible for catching any uncaught {@link Exception} and
  * converting it into standardized {@link ErrorResponse} JSON responses.
  */
 @Slf4j
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
@@ -27,9 +33,56 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getHttpStatus()).body(response);
     }
 
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ErrorResponse> handleFeignException(final FeignException ex) {
+        log.warn("Feign Client Exception: {} - Status: {}", ex.getMessage(), ex.status(), ex);
+
+        // Безопасное получение HttpStatus
+        HttpStatus status;
+        try {
+            status = ex.status() > 0 ? HttpStatus.valueOf(ex.status())
+                    : HttpStatus.INTERNAL_SERVER_ERROR;
+        } catch (IllegalArgumentException e) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        final ErrorResponse response = new ErrorResponse(
+                status,
+                "FEIGN_CLIENT_ERROR",
+                "Service temporarily unavailable",
+                LocalDateTime.now(),
+                ex.contentUTF8()
+        );
+
+        return ResponseEntity.status(status).body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            final MethodArgumentNotValidException ex) {
+
+        log.warn("Validation error: {}", ex.getMessage(), ex);
+
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+
+        final ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                errorMessage,
+                LocalDateTime.now(),
+                "Invalid request parameters"
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUncaughtException(final Exception ex) {
-        log.warn("Unexpected error: {}", ex.getMessage(), ex);
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
 
         final ErrorResponse response = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR,
