@@ -19,6 +19,5 @@ public class SetProductQuantityStateRequest {
     private UUID productId;
 
     @NotNull(message = "Quantity state cannot be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private QuantityState quantityState;
 }

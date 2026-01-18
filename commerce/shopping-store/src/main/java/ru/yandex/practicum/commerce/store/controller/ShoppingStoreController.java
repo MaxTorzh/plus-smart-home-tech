@@ -54,8 +54,40 @@ public class ShoppingStoreController {
 
     @PostMapping("/quantityState")
     @ResponseStatus(HttpStatus.OK)
-    public boolean updateQuantityState(@Valid @RequestBody SetProductQuantityStateRequest request) {
-        log.info("POST update quantity state: {}", request);
+    public boolean updateQuantityState(
+            @RequestParam(required = false) UUID productId,
+            @RequestParam(required = false) String quantityState,
+            @RequestBody(required = false) SetProductQuantityStateRequest requestBody) {
+
+        log.info("DEBUG - productId param: {}, quantityState param: {}, requestBody: {}",
+                productId, quantityState, requestBody);
+
+        UUID actualProductId;
+        QuantityState actualQuantityState;
+
+        if (productId != null && quantityState != null) {
+            actualProductId = productId;
+            try {
+                actualQuantityState = QuantityState.valueOf(quantityState.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid quantity state: " + quantityState);
+            }
+            log.info("Using parameters from query string");
+        }
+        else if (requestBody != null && requestBody.getProductId() != null && requestBody.getQuantityState() != null) {
+            actualProductId = requestBody.getProductId();
+            actualQuantityState = requestBody.getQuantityState();
+            log.info("Using parameters from request body");
+        }
+        else {
+            throw new IllegalArgumentException(
+                    "Provide either productId and quantityState as query parameters, " +
+                            "or provide SetProductQuantityStateRequest in request body");
+        }
+
+        SetProductQuantityStateRequest request =
+                new SetProductQuantityStateRequest(actualProductId, actualQuantityState);
+
         return shoppingStoreService.updateQuantityState(request);
     }
 
